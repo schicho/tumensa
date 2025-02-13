@@ -9,17 +9,12 @@ import (
 	"time"
 )
 
-type gqlMensaRespBody struct {
-	Data struct {
-		NodeByUri struct {
-			MenuplanCurrentWeek string `json:"menuplanCurrentWeek"`
-		} `json:"nodeByUri"`
-	} `json:"data"`
-}
-
 type mensaMenuPlan struct {
+	// menus here is the menu type like "Menü Veggie", "Menü Herzhaft", etc.
 	Menus []struct {
-		Name  string `json:"name"`
+		Name string `json:"name"`
+		// menus here is the actual dishes for each day of the week.
+		// The key is the weekday as a string, e.g. Wednesday is "3".
 		Menus map[string][]struct {
 			TitleDe string `json:"title_de"`
 			Price   string `json:"price"`

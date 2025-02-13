@@ -21,6 +21,14 @@ type gqlMensaReqBody struct {
 	Variables     gqlMensaReqVariables `json:"variables"`
 }
 
+type gqlMensaRespBody struct {
+	Data struct {
+		NodeByUri struct {
+			MenuplanCurrentWeek string `json:"menuplanCurrentWeek"`
+		} `json:"nodeByUri"`
+	} `json:"data"`
+}
+
 var gqlMensaRequest = gqlMensaReqBody{
 	OperationName: "Location",
 	Query: `query Location($locationUri: String!) {
