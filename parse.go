@@ -3,7 +3,6 @@ package tumensa
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"regexp"
 	"strconv"
@@ -16,6 +15,16 @@ type gqlMensaRespBody struct {
 			MenuplanCurrentWeek string `json:"menuplanCurrentWeek"`
 		} `json:"nodeByUri"`
 	} `json:"data"`
+}
+
+type mensaMenuPlan struct {
+	Menus []struct {
+		Name  string `json:"name"`
+		Menus map[string][]struct {
+			TitleDe string `json:"title_de"`
+			Price   string `json:"price"`
+		} `json:"menus"`
+	} `json:"menus"`
 }
 
 type Menu struct {
@@ -50,81 +59,34 @@ func parseGQLResponse(resp io.Reader) ([]byte, error) {
 	return []byte(menu), nil
 }
 
-// parseMenuJson parses the menu JSON and returns a slice of menu structs.
+// parseMenuJson parses the retrieved menu plan json into a slice of our simplified menu structs.
 func parseMenuJson(menuJson io.Reader, weekday time.Weekday) ([]Menu, error) {
-	var raw map[string]any
-	if err := json.NewDecoder(menuJson).Decode(&raw); err != nil {
+	var menuPlan mensaMenuPlan
+	if err := json.NewDecoder(menuJson).Decode(&menuPlan); err != nil {
 		return nil, err
 	}
 
-	// "menus" here is the menu types, e.g. "Mittagsmenü", "Tagesgericht", etc.
-	menusList, ok := raw["menus"].([]any)
-	if !ok {
-		return nil, errors.New("failed to parse menu list")
-	}
-	// Go requires an element wise conversion of the interface{} slice to the desired type.
-	menus := make([]map[string]any, 0, len(menusList))
-	for _, m := range menusList {
-		menu, ok := m.(map[string]any)
-		if !ok {
-			return nil, errors.New("failed to parse menus")
-		}
-		menus = append(menus, menu)
-	}
+	var parsedMenus []Menu = make([]Menu, 0, len(menuPlan.Menus))
 
-	var parsedMenus []Menu = make([]Menu, 0, len(menus))
+	for _, m := range menuPlan.Menus {
+		parsedMenuName := cleanMenuName(m.Name)
+		// The data structure is odd here. Compare the provided test file "menuPlanCurrentWeek.json".
+		// The data is first structured by the menu type like "Menü Veggie", "Menü Herzhaft", etc.
+		// and only subsequently by the day of the week.
+		// As such we need to use the weekday as a string key to access the correct menu.
+		parsedDishes := make([]Dish, 0, len(m.Menus[strconv.Itoa(int(weekday))]))
 
-	for _, m := range menus {
-		parsedMenuName, ok := m["name"].(string)
-		if !ok {
-			return nil, errors.New("failed to parse menu name")
-		}
-
-		// "menus" here are in fact dishes.
-		// The data structure is odd, as only at this point the weekday is used to index into the map.
-		// Subsequently, the dishes are stored in a slice of maps, where each map contains the dish name and price.
-		dishesDay, ok := m["menus"].(map[string]any)
-		if !ok {
-			return nil, errors.New("failed to parse dishes by day")
-		}
-		dishListSpecifiedDay, ok := dishesDay[strconv.Itoa(int(weekday))]
-		if !ok {
-			return nil, errors.New("no key for dishes of specified day")
-		}
-
-		dishesList, ok := dishListSpecifiedDay.([]any)
-		if !ok {
-			return nil, errors.New("failed to parse dishes list for specified day")
-		}
-		dishes := make([]map[string]any, 0, len(dishesList))
-		for _, d := range dishesList {
-			dish, ok := d.(map[string]any)
-			if !ok {
-				return nil, errors.New("failed to parse dish")
-			}
-			dishes = append(dishes, dish)
-		}
-
-		parsedDishes := make([]Dish, 0, len(dishes))
-
-		for _, d := range dishes {
-			parsedDishName, ok := d["title_de"].(string)
-			if !ok {
-				return nil, errors.New("failed to parse dish name")
-			}
-
-			parsedDishPrice, ok := d["price"].(string)
-			if !ok {
-				return nil, errors.New("failed to parse dish price")
-			}
+		for _, d := range m.Menus[strconv.Itoa(int(weekday))] {
+			parsedDishName := cleanDishName(d.TitleDe)
+			parsedDishPrice := d.Price
 
 			parsedDishes = append(parsedDishes, Dish{
-				Name:  cleanDishName(parsedDishName),
+				Name:  parsedDishName,
 				Price: parsedDishPrice,
 			})
 		}
 		parsedMenus = append(parsedMenus, Menu{
-			Name:   cleanMenuName(parsedMenuName),
+			Name:   parsedMenuName,
 			Dishes: parsedDishes,
 		})
 	}
