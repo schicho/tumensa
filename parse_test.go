@@ -91,3 +91,19 @@ func TestParseMenuJSON(t *testing.T) {
 		}
 	}
 }
+
+func TestParseMissingDay(t *testing.T) {
+	file, err := os.Open("testResources/menuPlanCurrentWeek.json")
+	if err != nil {
+		t.Fatal("Failed to read test file:", err)
+	}
+	defer file.Close()
+
+	_, err = parseMenuJson(file, time.Tuesday)
+	if err == nil {
+		t.Error("Expected error, got nil")
+	}
+	if err.Error() != "no menu for weekday" {
+		t.Errorf("Expected error 'no menu for weekday', got %v", err)
+	}
+}

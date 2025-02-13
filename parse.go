@@ -3,6 +3,7 @@ package tumensa
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"regexp"
 	"strconv"
@@ -69,9 +70,13 @@ func parseMenuJson(menuJson io.Reader, weekday time.Weekday) ([]Menu, error) {
 		// The data is first structured by the menu type like "Menü Veggie", "Menü Herzhaft", etc.
 		// and only subsequently by the day of the week.
 		// As such we need to use the weekday as a string key to access the correct menu.
-		parsedDishes := make([]Dish, 0, len(m.Menus[strconv.Itoa(int(weekday))]))
+		dishesOnDay, ok := m.Menus[strconv.Itoa(int(weekday))]
+		if !ok {
+			return nil, errors.New("no menu for weekday")
+		}
 
-		for _, d := range m.Menus[strconv.Itoa(int(weekday))] {
+		parsedDishes := make([]Dish, 0, len(dishesOnDay))
+		for _, d := range dishesOnDay {
 			parsedDishName := cleanDishName(d.TitleDe)
 			parsedDishPrice := d.Price
 
