@@ -10,6 +10,14 @@ import (
 	"time"
 )
 
+type gqlMensaRespBody struct {
+	Data struct {
+		NodeByUri struct {
+			MenuplanCurrentWeek string `json:"menuplanCurrentWeek"`
+		} `json:"nodeByUri"`
+	} `json:"data"`
+}
+
 type Menu struct {
 	Name   string
 	Dishes []Dish
@@ -23,27 +31,22 @@ type Dish struct {
 // ParseGQLResponse parses the JSON response from the GraphQL API and returns a slice of menu structs.
 // The weekday parameter is used to select the menu for the current day.
 func ParseGQLResponse(resp io.Reader, weekday time.Weekday) ([]Menu, error) {
-	menuJson, err := extractMenuJson(resp)
+	menuJson, err := parseGQLResponse(resp)
 	if err != nil {
 		return nil, err
 	}
 	return parseMenuJson(bytes.NewReader(menuJson), weekday)
 }
 
-// extractMenuJson extracts the embedded menu json from the HTTP response body.
+// parseGQLResponse extracts the embedded menu json from the HTTP response body.
 // The respone body contains a JSON GraphQL response, which in itself contains the actual menu JSON
 // embedded under the key "data.nodeByUri.menuplanCurrentWeek".
-func extractMenuJson(resp io.Reader) ([]byte, error) {
-	var raw map[string]map[string]any
-	if err := json.NewDecoder(resp).Decode(&raw); err != nil {
+func parseGQLResponse(resp io.Reader) ([]byte, error) {
+	var gqlResponse gqlMensaRespBody
+	if err := json.NewDecoder(resp).Decode(&gqlResponse); err != nil {
 		return nil, err
 	}
-
-	menu, ok := raw["data"]["nodeByUri"].(map[string]any)["menuplanCurrentWeek"].(string)
-	if !ok {
-		return nil, errors.New("failed to extract embedded menu json")
-	}
-
+	menu := gqlResponse.Data.NodeByUri.MenuplanCurrentWeek
 	return []byte(menu), nil
 }
 

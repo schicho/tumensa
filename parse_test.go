@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+func TestParseGQLResponse(t *testing.T) {
+	file, err := os.Open("testResources/gqlResponse.json")
+	if err != nil {
+		t.Fatal("Failed to read test file:", err)
+	}
+	defer file.Close()
+
+	menuJson, err := parseGQLResponse(file)
+	if err != nil {
+		t.Error("Failed to parse GQL response:", err)
+	}
+
+	if len(menuJson) == 0 {
+		t.Error("Parsed menu JSON is empty:", menuJson)
+	}
+}
+
 func TestParseMenuJSON(t *testing.T) {
 	file, err := os.Open("testResources/menuPlanCurrentWeek.json")
 	if err != nil {
