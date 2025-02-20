@@ -1,24 +1,21 @@
 # TU Wien Mensa
 
-Get the menu of the day from the TU Wien Mensa directly in your terminal:
+Get the menu of the day from the TU Wien Mensa directly on your terminal.
 
-<pre>
-<font color="#729FCF"><b>~</b></font>$ tumensa 
-<font color="#AD7FA8"><b>12.02.2025 Wednesday:</b></font>
-<font color="#34E2E2"><b>Menü Veggie:</b></font>
-    - 6.50 : Rösti Ratatouille Dip mit Kren und Kräutern
-<font color="#34E2E2"><b>Menü Herzhaft:</b></font>
-    - 7.60 : Koreanisches Bulgogi Eiernudeln
-<font color="#34E2E2"><b>Tagesgerichte:</b></font>
-    - 11.90 : Little Italy Burger mit BIO Rindfleisch und Pommes frites
-    - 9.90 : Melanzani Burger mit Pommes frites
-</pre>
+![TU Wien Mensa Screenshot](.github/screenshot.png)
 
 ## Compile & Install
 
-If you have the Go programming language installed, you can install the program with the following command.
+If you have the Go programming language installed, you can simply install the program with the following command.
 It will be added to your `$GOPATH/bin` directory. Thus also on your `$PATH` and runnable from anywhere.
 
 ```bash
 go install github.com/schicho/tumensa/cmd@latest
 ```
+
+Alternatively, you can of course go through the manual git clone and go build process.
+
+In case you don't have Go installed, you can download the latest release from the releases page here on GitHub.
+You can see the releases in the sidebar on the right.
+Depending on your operating system, download and extract the archive and move the binary to a directory in your `$PATH`.
+You can then run the program from anywhere in your terminal.
