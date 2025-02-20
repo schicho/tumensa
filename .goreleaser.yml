@@ -1,0 +1,19 @@
+project_name: tumensa
+builds:
+  - env: [CGO_ENABLED=0]
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+nfpms:
+- maintainer: Johann Sebastian Schicho
+  description: TU Mensa canteen plan CLI
+  homepage: https://github.com/schicho/tumensa
+  license: MIT
+  formats:
+  - deb
+  - rpm
+  - apk
