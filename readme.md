@@ -10,7 +10,7 @@ If you have the Go programming language installed, you can simply install the pr
 It will be added to your `$GOPATH/bin` directory. Thus also on your `$PATH` and runnable from anywhere.
 
 ```bash
-go install github.com/schicho/tumensa/cmd@latest
+go install github.com/schicho/tumensa/cmd/tumensa@latest
 ```
 
 Alternatively, you can of course go through the manual git clone and go build process.
