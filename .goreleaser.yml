@@ -1,7 +1,7 @@
 project_name: tumensa
 builds:
   - env: [CGO_ENABLED=0]
-    main: ./cmd/tumensa
+    main: ./cmd/tumensa/
     goos:
       - linux
       - windows
