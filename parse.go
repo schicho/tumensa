@@ -102,5 +102,7 @@ func cleanDishName(name string) string {
 // cleanMenuName removes the content in parentheses from the menu name.
 func cleanMenuName(name string) string {
 	re := regexp.MustCompile(` \(.*\)`)
-	return re.ReplaceAllString(name, "")
+	re2 := regexp.MustCompile(`\s+`)
+	name = re.ReplaceAllString(name, "")
+	return re2.ReplaceAllString(name, " ")
 }
